@@ -1,42 +1,29 @@
-// g++ $(pkg-config --cflags --libs opencv) -std=c++11 image_gamma.cpp -o image_gamma
 #include "opencv2/opencv.hpp"
 #include <iostream> 
 
 using namespace cv;
 using namespace std;
 
+
 Mat apply_gamma_transform(Mat& gray, double gamma);
 void get_logTable(uchar lut[]);
 void prepare_lut(unsigned char lut[], float fGamma, float C);
 
 int main() {
-	Mat img, gray;
-	unsigned char lut1[256], lut2[256], log_lut[256];
-	gray = imread("./images/coin_B10.jpg");//Fig03_pollen4.tif");
+	Mat img = imread("./data/Ch12/adaptive_1.jpg", IMREAD_GRAYSCALE);
+	Mat dst;
 
-	if (gray.empty())
-		return 0;
 
-	float width = 500;
-	float height = width * ((double)gray.rows / (double)gray.cols);
+	img = apply_gamma_transform(img, 0.1);
 
-	resize(gray, gray, Size(width, height));
+	threshold(img, dst, 0, 255, THRESH_OTSU | THRESH_BINARY_INV);
 
-	Mat T = apply_gamma_transform(gray, 0.2);
-	Mat T2 = apply_gamma_transform(gray, 2.5);
-	get_logTable(log_lut);
+	imshow("img", img);
+	imshow("binary_inv", dst);
 
-	Mat table3(1, 256, CV_8UC1, lut2);
-	Mat T3 = gray.clone();
+	waitKey();
 
-	LUT(gray, table3, T3);
-
-	imshow("org gray", gray);
-	imshow("gamma=0.2", T2);
-	imshow("gamma=2.5", T3);
-	imshow("log", T);
-	waitKey(0);
-	destroyAllWindows();
+	return 0;
 }
 
 Mat apply_gamma_transform(Mat& gray, double gamma) {

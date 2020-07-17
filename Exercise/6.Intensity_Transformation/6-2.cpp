@@ -8,33 +8,33 @@ using namespace std;
 Mat apply_gamma_transform(Mat& gray, double gamma);
 void get_logTable(uchar lut[]);
 void prepare_lut(unsigned char lut[], float fGamma, float C);
+void GammaCorrection(int, void*);
+void GammaCorrection2(int, void*);
+
+
+static Mat T, T2, Aerial, Fracture;
+static int g1, g2;
 
 int main() {
-	Mat img, gray;
 	unsigned char lut1[256], lut2[256], log_lut[256];
-	gray = imread("./images/coin_B10.jpg");//Fig03_pollen4.tif");
+	Aerial = imread("./data/Ch8/Aerial_image.png", IMREAD_GRAYSCALE);
+	Fracture = imread("./data/Ch8/Fracture_spline.png", IMREAD_GRAYSCALE);
 
-	if (gray.empty())
-		return 0;
+	if (Aerial.empty() || Fracture.empty())
+		return -1;
 
 	float width = 500;
-	float height = width * ((double)gray.rows / (double)gray.cols);
+	float height = width * ((double)Aerial.rows / (double)Aerial.cols);
 
-	resize(gray, gray, Size(width, height));
+	resize(Aerial, Aerial, Size(width, height));
+	resize(Fracture, Fracture, Size(width, height));
 
-	Mat T = apply_gamma_transform(gray, 0.2);
-	Mat T2 = apply_gamma_transform(gray, 2.5);
-	get_logTable(log_lut);
+	namedWindow("gamma1", WINDOW_FREERATIO);
+	namedWindow("gamma2", WINDOW_FREERATIO);
 
-	Mat table3(1, 256, CV_8UC1, lut2);
-	Mat T3 = gray.clone();
+	createTrackbar("gamma1", "gamma1", &g1, 400, GammaCorrection);
+	createTrackbar("gamma2", "gamma2", &g2, 400, GammaCorrection2);
 
-	LUT(gray, table3, T3);
-
-	imshow("org gray", gray);
-	imshow("gamma=0.2", T2);
-	imshow("gamma=2.5", T3);
-	imshow("log", T);
 	waitKey(0);
 	destroyAllWindows();
 }
@@ -71,4 +71,13 @@ void prepare_lut(unsigned char lut[], float fGamma, float C)
 		cout << i << ':' << v << ':' << (int)lut[i] << endl;
 	}
 
+}
+void GammaCorrection(int, void*) {
+	T = apply_gamma_transform(Aerial, (double)g1*0.1);
+	imshow("Gamma1", T);
+}
+
+void GammaCorrection2(int, void*) {
+	T2 = apply_gamma_transform(Fracture, (double)g2*0.1);
+	imshow("Gamma2", T2);
 }

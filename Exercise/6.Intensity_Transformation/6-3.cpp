@@ -8,35 +8,35 @@ using namespace std;
 Mat apply_gamma_transform(Mat& gray, double gamma);
 void get_logTable(uchar lut[]);
 void prepare_lut(unsigned char lut[], float fGamma, float C);
+void GammaCorrection(int, void*);
+void GammaCorrection2(int, void*);
+
+static Mat img, img2, T, T2;
+static int g;
 
 int main() {
-	Mat img, gray;
 	unsigned char lut1[256], lut2[256], log_lut[256];
-	gray = imread("./images/coin_B10.jpg");//Fig03_pollen4.tif");
+	img = imread("./data/Ch8/reverse_light_1.jpg", IMREAD_GRAYSCALE);
 
-	if (gray.empty())
-		return 0;
+	if (img.empty())
+		return -1;
 
 	float width = 500;
-	float height = width * ((double)gray.rows / (double)gray.cols);
+	float height = width * ((double)img.rows / (double)img.cols);
 
-	resize(gray, gray, Size(width, height));
+	resize(img, img, Size(width, height));
 
-	Mat T = apply_gamma_transform(gray, 0.2);
-	Mat T2 = apply_gamma_transform(gray, 2.5);
-	get_logTable(log_lut);
+	img2 = img.clone();
+	img2 += 50;
 
-	Mat table3(1, 256, CV_8UC1, lut2);
-	Mat T3 = gray.clone();
+	namedWindow("gamma1");
 
-	LUT(gray, table3, T3);
+	createTrackbar("Gamma1", "gamma1", &g, 200, GammaCorrection);
 
-	imshow("org gray", gray);
-	imshow("gamma=0.2", T2);
-	imshow("gamma=2.5", T3);
-	imshow("log", T);
 	waitKey(0);
 	destroyAllWindows();
+
+	return 0;
 }
 
 Mat apply_gamma_transform(Mat& gray, double gamma) {
@@ -71,4 +71,10 @@ void prepare_lut(unsigned char lut[], float fGamma, float C)
 		cout << i << ':' << v << ':' << (int)lut[i] << endl;
 	}
 
+}
+void GammaCorrection(int, void*) {
+	T = apply_gamma_transform(img, (double)g * 0.1);
+	T2 = apply_gamma_transform(img2, (double)g * 0.1);
+	imshow("Gamma1", T);
+	imshow("Gamma2", T2);
 }
