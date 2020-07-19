@@ -10,30 +10,36 @@ int main() {
 
 	VideoCapture video(link);
 	
+	if (!video.isOpened())
+		return -1;
+
 	Mat frame, background;
 
 	video >> background;
 
 	cvtColor(background, background, COLOR_BGR2GRAY);
 
-	threshold(background, background, 200, 255, THRESH_OTSU | THRESH_BINARY_INV);
+	adaptiveThreshold(background, background, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 9, 5);
+
+	//threshold(background, background, 0, 255, THRESH_OTSU | THRESH_BINARY_INV);
 
 	imshow("background", background);
 
 	while (true) {
-		if (!video.isOpened())
-			return -1;
 
 		video >> frame;
 
-
+		if (frame.empty())
+			break;
 		cvtColor(frame, frame, COLOR_BGR2GRAY);
 
-		threshold(frame, frame, 200, 255, THRESH_OTSU | THRESH_BINARY_INV);
+		adaptiveThreshold(frame, frame, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 9, 10);
+
+		//threshold(frame, frame, 0, 255, THRESH_OTSU | THRESH_BINARY_INV);
 
 		subtract(frame, background, frame);
 
-		morphologyEx(frame, frame, MORPH_OPEN, Mat(), Point(-1, -1), 2);
+		morphologyEx(frame, frame, MORPH_OPEN, Mat(), Point(-1, -1), 1);
 
 		imshow("video", frame);
 

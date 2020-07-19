@@ -16,7 +16,8 @@ int main() {
 	
 	while (true) {
 		video >> frame;
-
+		if (frame.empty())
+			break;
 		//update the background model
 		pBackSub->apply(frame, frame);
 
