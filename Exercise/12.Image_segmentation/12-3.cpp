@@ -13,9 +13,9 @@ int main() {
 	Mat img = imread("./data/Ch12/adaptive.png", IMREAD_GRAYSCALE);
 	Mat dst;
 
-	img = apply_gamma_transform(img, 0.01);
-	threshold(img, dst, 0, 255, THRESH_OTSU | THRESH_BINARY_INV);
-
+	img = apply_gamma_transform(img, 0.2);
+	//threshold(img, dst, 0, 255, THRESH_OTSU | THRESH_BINARY_INV);
+	adaptiveThreshold(img, dst, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY_INV,3, 3);
 	imshow("img", img);
 	imshow("binary_inv", dst);
 

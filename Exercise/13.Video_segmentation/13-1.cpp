@@ -13,43 +13,56 @@ int main() {
 	if (!video.isOpened())
 		return -1;
 
-	Mat frame, background, kennel, result;
+	Mat frame, background, kennel, result, avg;
+	vector<Mat> Fra(10);
 
 	video >> background;
-	/*
+
+	Fra[0] = background.clone();
+	int cnt = 0;
+
 	cvtColor(background, background, COLOR_BGR2GRAY);
 
-	adaptiveThreshold(background, background, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY_INV, 9, 10);
-	*/
-	//threshold(background, background, 0, 255, THRESH_OTSU | THRESH_BINARY_INV);
-
-	imshow("background", background);
-
 	while (true) {
+
+		cnt++;
 
 		video >> frame;
 
 		if (frame.empty())
 			break;
 
-
-		subtract(background, frame, frame);
-
 		cvtColor(frame, frame, COLOR_BGR2GRAY);
+
+		if (avg.empty())
+			avg = frame.clone()/Fra.size();
+
+		int k = cnt % Fra.size();
+		add(avg, frame / Fra.size(), avg);
+
+		if (10 < cnt){
+			subtract(avg, Fra[k]/ Fra.size(), avg);
+			background = avg.clone();
+		}
+		Fra[k] = frame.clone();
+
+		imshow("background", background);
 
 		medianBlur(frame, frame, 9);
 
-		//adaptiveThreshold(frame, frame, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 9, 1);
-
+		//adaptiveThreshold(frame, frame, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 9, 10);
+		
+		absdiff(frame, background, frame);
+		
 		threshold(frame, frame, 40, 255, THRESH_BINARY);
 
 		//subtract(frame, background, frame);
 
 		kennel = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
 
-		morphologyEx(frame, frame, MORPH_OPEN, kennel, Point(-1, -1), 1);
+		morphologyEx(frame, frame, MORPH_OPEN, kennel, Point(-1, -1), 3);
 
-		dilate(frame, frame, kennel,  Point(-1, -1), 3);
+		//dilate(frame, frame, kennel,  Point(-1, -1), 3);
 
 		imshow("video orig", frame);
 
@@ -58,7 +71,6 @@ int main() {
 
 		vector<Rect> boundRect(contours.size());
 		vector<Point2f>centers(contours.size());
-		vector<float>radius(contours.size());
 
 		cvtColor(frame, result, COLOR_GRAY2BGR);
 
