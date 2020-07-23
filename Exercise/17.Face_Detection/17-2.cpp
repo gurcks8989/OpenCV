@@ -82,7 +82,7 @@ void sum_pixel(Mat binary, Mat iimage, Rect R) {
 	double sum = (idata2[R.br().x] - idata2[R.tl().x] -
 		idata1[R.br().x] + idata1[R.tl().x]) / ((R.br().x - R.tl().x) * (R.br().y - R.tl().y));
 
-
+ 
 	Mat element(binary, R);
 	
 	element = Scalar(sum);
