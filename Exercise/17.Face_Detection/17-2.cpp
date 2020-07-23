@@ -4,7 +4,7 @@
 using namespace cv;
 using namespace std;
 
-void sum_pixel(Mat iimage, Rect R);
+void sum_pixel(Mat binary, Mat iimage, Rect R);
 
 int main() {
 
@@ -56,45 +56,36 @@ int main() {
 
 	//convertScaleAbs(iimage, iimage, CV_32S);
 
-	sum_pixel(iimage, R1);
-	sum_pixel(iimage, R2);
-	sum_pixel(iimage, R3);
+	sum_pixel(binary, iimage, R1);
+	sum_pixel(binary, iimage, R2);
+	sum_pixel(binary, iimage, R3);
 
-
-	imshow("integral", iimage);
-	imshow("gray", gray);
-
-
-
-	/*
-	Mat ele1(sum, Rect(Point(100, 100), Point(200, 200)));
-	Mat ele2(sum, Rect(Point(150, 150), Point(170, 170)));
-	Mat ele3(sum, Rect(Point(200, 200), Point(210, 210)));
-
-	//Mat dst, dst2, result;
-	
-	imshow("ele1", ele1);
-	imshow("ele2", ele2);
-	imshow("ele3", ele3);
-
+	//Mat dst, dst2, result
 	//addWeighted(gray, 0.25, ele1, 0.25, 0.5, dst);
 	//addWeighted(ele2, 0.25, ele3, 0.25, 0.5, dst2);
 	//result = dst + dst2;
-	
-	*/
 	//imshow("result", result);
+
+	imshow("integral", binary);
+	imshow("gray", gray);
 
 	waitKey();
 
 	return 0;
 }
 
-void sum_pixel(Mat iimage, Rect R) {
+void sum_pixel(Mat binary, Mat iimage, Rect R) {
 
 	int* idata1 = iimage.ptr<int>(R.tl().y);
 	int* idata2 = iimage.ptr<int>(R.br().y);
 
-	int sum = (idata2[R.br().x] - idata2[R.tl().x] -
-		idata1[R.br().x] + idata1[R.tl().x]);// / ((R1.br().x - R1.tl().x) * (R1.br().y - R1.tl().y));
+	double sum = (idata2[R.br().x] - idata2[R.tl().x] -
+		idata1[R.br().x] + idata1[R.tl().x]) / ((R.br().x - R.tl().x) * (R.br().y - R.tl().y));
 
+
+	Mat element(binary, R);
+	
+	element = Scalar(sum);
+
+	rectangle(binary, R, Scalar(0, 0, 255), 1);
 }
