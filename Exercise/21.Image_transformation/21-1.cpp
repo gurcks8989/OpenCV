@@ -64,9 +64,7 @@ int main() {
 
 	Mat frame, background;
 
-
     MouseParams mp;
-
 
 	if (!video.isOpened() || !display.isOpened())
 		return -1;
@@ -120,8 +118,9 @@ int main() {
 
             Mat homo_mat = getPerspectiveTransform(mp.in, mp.out);
             //homography 행령을 이용한 warp
-            warpPerspective(frame, piece, homo_mat, Size(background.size().width, background.size().height));
+            warpPerspective(frame, piece, homo_mat, background.size());
 
+            imshow("piece", piece);
             background += piece;
         }
         imshow("output", background);
