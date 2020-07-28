@@ -11,37 +11,80 @@ struct MouseParams {
 
 int main() {
 
-    string link = "./data/transformation.jpg";
+    //string link = "./data/transformation.jpg";
+    string link = "./data/transformation_1.jpg";
 
     Mat frame = imread(link, IMREAD_COLOR);
 
-    Mat result;
+    Mat gray, edge, kennel, result;
+
+    vector<Vec4i> lines;
 
     resize(frame, frame, Size(600, 800));
 
     if (frame.empty()) {
-        cerr << "can not found the image file" << endl; 
+        cerr << "can not found the image file" << endl;
         return -1;
     }
     int x = frame.size().width;
     int y = frame.size().height;
 
-    MouseParams mp;
-    
-    mp.out.push_back(Point2f(0, 0));
-    mp.out.push_back(Point2f(210*2, 0));
-    mp.out.push_back(Point2f(210*2, 297*2));
-    mp.out.push_back(Point2f(0, 297*2));
+    cvtColor(frame, gray, COLOR_BGR2GRAY);
 
-    mp.in.push_back(Point2f(260, 90));
-    mp.in.push_back(Point2f(569, 100));
-    mp.in.push_back(Point2f(447, 534));
-    mp.in.push_back(Point2f(23, 421));
-    
+    GaussianBlur(gray, gray, Size(3, 3), 1);
+
+    Canny(gray, edge, 8, 70, 3);
+
+    kennel = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
+
+    morphologyEx(edge, edge, MORPH_CLOSE, kennel, Point(-1, -1), 3);
+    /*
+    HoughLinesP(edge, lines, 1, CV_PI / 180, 100, 5, 40);
+
+    for (int i = 0; i < lines.size(); i++) {
+        Vec4i l = lines[i];
+        line(frame, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255), 3, 8);
+    }
+    */
+
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    findContours(edge.clone(), contours, hierarchy, RETR_LIST, CHAIN_APPROX_SIMPLE);
+
+    vector<Point2f> approx;
+    result = frame.clone();
+
+    int max = 0;
+    int index = 0;
+    for (size_t i = 0; i < contours.size(); i++) {
+        if (max < arcLength(Mat(contours[i]), true)) {
+            max = arcLength(Mat(contours[i]), true);
+            index = i;
+        }
+    }
+    approxPolyDP(Mat(contours[index]), approx, max * 0.02, true);
+
+    //Rect R = boundingRect(approx);
+
+    //drawContours(result, contours, i, Scalar(0, 0, 255), 2);
+
+    MouseParams mp;
+
+    //A4 size
+    mp.out.push_back(Point2f(0, 0));
+    mp.out.push_back(Point2f(210 * 2, 0));
+    mp.out.push_back(Point2f(210 * 2, 297 * 2));
+    mp.out.push_back(Point2f(0, 297 * 2));
+
+    for (int i = 0; i < approx.size(); i++)
+        mp.in.push_back(approx[i]);
+
     Mat homo_mat = getPerspectiveTransform(mp.in, mp.out);
     //homography 행령을 이용한 warp
     warpPerspective(frame, result, homo_mat, frame.size());
 
+    imshow("input", frame);
+    imshow("edge", edge);
     imshow("output", result);
 
     waitKey();
