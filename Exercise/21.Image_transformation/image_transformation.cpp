@@ -11,14 +11,12 @@ struct MouseParams {
 
 int main() {
 
-    //string link = "./data/transformation.jpg";
-    string link = "./data/transformation_1.jpg";
+    string link = "./data/transformation.jpg";
+    //string link = "./data/transformation_1.jpg";
 
     Mat frame = imread(link, IMREAD_COLOR);
 
     Mat gray, edge, kennel, result;
-
-    vector<Vec4i> lines;
 
     resize(frame, frame, Size(600, 800));
 
@@ -38,14 +36,6 @@ int main() {
     kennel = getStructuringElement(MORPH_ELLIPSE, Size(3, 3));
 
     morphologyEx(edge, edge, MORPH_CLOSE, kennel, Point(-1, -1), 3);
-    /*
-    HoughLinesP(edge, lines, 1, CV_PI / 180, 100, 5, 40);
-
-    for (int i = 0; i < lines.size(); i++) {
-        Vec4i l = lines[i];
-        line(frame, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255), 3, 8);
-    }
-    */
 
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
@@ -76,8 +66,11 @@ int main() {
     mp.out.push_back(Point2f(210 * 2, 297 * 2));
     mp.out.push_back(Point2f(0, 297 * 2));
 
-    for (int i = 0; i < approx.size(); i++)
+    for (int i = 0; i < approx.size(); i++) {
+
+        cout << "approx_" << i << approx[i] << endl;
         mp.in.push_back(approx[i]);
+    }
 
     Mat homo_mat = getPerspectiveTransform(mp.in, mp.out);
     //homography 행령을 이용한 warp
@@ -88,5 +81,6 @@ int main() {
     imshow("output", result);
 
     waitKey();
+
     return 0;
 }
