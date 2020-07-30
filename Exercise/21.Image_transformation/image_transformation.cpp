@@ -11,8 +11,8 @@ struct MouseParams {
 
 int main() {
 
-    string link = "./data/transformation.jpg";
-    //string link = "./data/transformation_1.jpg";
+    //string link = "./data/transformation.jpg";
+    string link = "./data/transformation_1.jpg";
 
     Mat frame = imread(link, IMREAD_COLOR);
 
@@ -53,10 +53,6 @@ int main() {
         }
     }
     approxPolyDP(Mat(contours[index]), approx, max * 0.02, true);
-
-    //Rect R = boundingRect(approx);
-
-    //drawContours(result, contours, i, Scalar(0, 0, 255), 2);
 
     MouseParams mp;
 
