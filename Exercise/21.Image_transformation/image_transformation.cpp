@@ -11,8 +11,8 @@ struct MouseParams {
 
 int main() {
 
-    //string link = "./data/transformation.jpg";
-    string link = "./data/transformation_1.jpg";
+    //string link = "./data/image_transformation/transformation.jpg";
+    string link = "./data/image_transformation/transformation_1.jpg";
 
     Mat frame = imread(link, IMREAD_COLOR);
 
